@@ -1,5 +1,6 @@
 import redis
 import time
+import random
 
 ONE_WEEK_IN_SECONDS = 7 * 86400
 VOTE_SCORE = 432
@@ -10,8 +11,8 @@ def article_vote(conn, user, article):
     if conn.zscore('time:', article) < cutoff:
         return
     article_id = article.split(':')[-1]
-    if conn.sadd('votrd:' + article_id, user):
-        conn.zincrby('score:', article, VOTE_SCORE)
+    if conn.sadd('voted:' + article_id, user):
+        conn.zincrby('score:', VOTE_SCORE, article)
         conn.hincrby(article, 'votes', 1)
 
 def post_article(conn, user, title, link):
@@ -123,7 +124,21 @@ def main():
         article_id = post_article(conn, article['poster'], article['title'], article['link'])
         print('Posted article:', article_id)
         
+    print('Finished posting:')
     posted_articles = get_articles(conn, 1)
+    for article in posted_articles:
+        print(article)
+
+    for _ in range(100):
+        random_voter_id = random.randrange(100, 1000)
+        random_voter = 'voter:' + str(random_voter_id)
+        print('voter:', random_voter)
+        article_id = random.randrange(1, 7)
+        article = 'article:' + str(article_id)
+        print('vote for article:', article)
+        article_vote(conn, random_voter, article)
+
+    print('Finished voting:')
     for article in posted_articles:
         print(article)
 
