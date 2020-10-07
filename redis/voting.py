@@ -11,8 +11,8 @@ def article_vote(conn, user, article):
         return
     article_id = article.partition(':')[-1]
     if conn.sadd('votrd:' + article_id, user):
-        conn.zincreby('score:', article, VOTE_SCORE)
-        conn.hincreby(article, 'votes', 1)
+        conn.zincrby('score:', article, VOTE_SCORE)
+        conn.hincrby(article, 'votes', 1)
 
 def post_article(conn, user, title, link):
     article_id = str(conn.incr('article:'))
