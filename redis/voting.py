@@ -35,7 +35,7 @@ def post_article(conn, user, title, link):
 
     return article_id
 
-def get_article(conn, page, order='score:'):
+def get_articles(conn, page, order='score:'):
     start = (page-1) * ARTICLES_PER_PAGE
     end = start + ARTICLES_PER_PAGE - 1
 
@@ -56,4 +56,17 @@ def add_remove_groups(conn, article_id, to_add=[], to_remove=[]):
     
     for group in to_remove:
         conn.srem('group:'+group, article)
+
+def get_group_articles(conn, group, page, order='score:'):
+    key = order + group
+    if not conn.exists(key):
+        conn.zintegerscore(
+            key,
+            ['group:' + group, order],
+            aggregate='max'
+        )
+        conn.expire(key, 60)
+
+    return get_articles(conn, page, key)
+
 
