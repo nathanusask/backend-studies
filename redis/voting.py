@@ -23,15 +23,16 @@ def post_article(conn, user, title, link):
     now = time.time()
     article = 'article:' + article_id
 
-    conn.hmset(article, {
+    conn.hset(article, mapping={
         'title': title,
         'link': link,
         'poster': user,
+        'time': now,
         'votes': 1,
     })
 
-    conn.zadd('score:', article, now + VOTE_SCORE)
-    conn.zadd('time:', article, now)
+    conn.zadd('score:', {article: now + VOTE_SCORE})
+    conn.zadd('time:', {article: now})
 
     return article_id
 
@@ -70,3 +71,61 @@ def get_group_articles(conn, group, page, order='score:'):
     return get_articles(conn, page, key)
 
 
+def main():
+    articles = [
+        {
+            'title': 'title 1',
+            'link': 'link 1',
+            'poster': 'user 1',
+        },
+        {
+            'title': 'title 2',
+            'link': 'link 2',
+            'poster': 'user 2',
+        },
+        {
+            'title': 'title 3',
+            'link': 'link 3',
+            'poster': 'user 3',
+        },
+        {
+            'title': 'title 4',
+            'link': 'link 4',
+            'poster': 'user 4',
+        },
+        {
+            'title': 'title 5',
+            'link': 'link 5',
+            'poster': 'user 5',
+        },
+        {
+            'title': 'title 6',
+            'link': 'link 6',
+            'poster': 'user 6',
+        },
+    ]
+
+    try:
+        conn = redis.StrictRedis()
+        print(conn)
+        conn.ping()
+        print('Connected!')
+    except Exception as ex:
+        print('Error:', ex)
+        exit('Failed to connect, terminating.')
+
+    conn.flushdb()
+
+    print('Total articles:', len(get_articles(conn, 1)))
+
+    for article in articles:
+        print('Posting article,', article)
+        article_id = post_article(conn, article['poster'], article['title'], article['link'])
+        print('Posted article:', article_id)
+        
+    posted_articles = get_articles(conn, 1)
+    for article in posted_articles:
+        print(article)
+
+if __name__ == '__main__':
+    main()
