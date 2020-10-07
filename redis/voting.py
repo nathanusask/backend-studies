@@ -139,6 +139,7 @@ def main():
         article_vote(conn, random_voter, article)
 
     print('Finished voting:')
+    posted_articles = get_articles(conn, 1)
     for article in posted_articles:
         print(article)
 
