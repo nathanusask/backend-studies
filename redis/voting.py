@@ -62,7 +62,7 @@ def add_remove_groups(conn, article_id, to_add=[], to_remove=[]):
 def get_group_articles(conn, group, page, order='score:'):
     key = order + group
     if not conn.exists(key):
-        conn.zintegerscore(
+        conn.zinterstore(
             key,
             ['group:' + group, order],
             aggregate='max'
@@ -142,6 +142,22 @@ def main():
     posted_articles = get_articles(conn, 1)
     for article in posted_articles:
         print(article)
+
+    groups = ['sports', 'entertainment']
+    add_remove_groups(conn, '1', to_add=groups[:1])
+    add_remove_groups(conn, '3', to_add=groups[1:])
+    print('Sports articles:')
+    sports_articles = get_group_articles(conn, groups[0], 1)
+    for sa in sports_articles:
+        print(sa)
+
+    print('\nEntertainment articles:')
+    entertainment_articles = get_group_articles(conn, groups[1], 1)
+    for ea in entertainment_articles:
+        print(ea)
+
+    print()
+    
 
 if __name__ == '__main__':
     main()
