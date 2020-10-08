@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"time"
 
-	"github.com/nathanusask/backend-studies/fake-web-retailer/internal/tokens"
 	redis "github.com/go-redis/redis/v8"
+	"github.com/nathanusask/backend-studies/fake-web-retailer/internal/tokens"
 )
 
 func main() {
@@ -16,7 +15,4 @@ func main() {
 	})
 
 	tokenService := tokens.New(redisClient)
-
-	token := "some random token"
-	tokenService.CheckToken(ctx, token)
 }
