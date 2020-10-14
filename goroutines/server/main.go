@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const maxPingTime = 10
+const maxPingTimeInMilliseconds = 5000
 
 var domains = []string{
 	"domain1.com",
@@ -19,6 +19,13 @@ var domains = []string{
 	"domain6.com",
 	"domain7.com",
 	"domain8.com",
+	"domain9.com",
+	"domain10.com",
+	"domain11.com",
+	"domain12.com",
+	"domain13.com",
+	"domain14.com",
+	"domain15.com",
 }
 
 func main() {
@@ -27,8 +34,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	fastest := make(chan string, len(domains)+1)
-	defer close(fastest)
+	fastest := make(chan string)
 
 	wg := &sync.WaitGroup{}
 
@@ -38,32 +44,29 @@ func main() {
 			defer wg.Done()
 
 			_ = ping(ctx, domain)
-			select {
-			case fastest <- domain:
-			}
+			fastest <- domain
 		}(ctx, domain)
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		select {
-		case res := <-fastest:
-			fmt.Println("Fastest domain is ", res)
-			return
-		case <-ctx.Done():
-			return
-		}
-	}()
-
-	wg.Wait()
+	defer wg.Done()
+	select {
+	case res := <-fastest:
+		fmt.Println("Fastest domain is", res)
+		close(fastest)
+		return
+	case <-ctx.Done():
+		close(fastest)
+		return
+	}
 }
 
 func ping(ctx context.Context, domain string) int {
 	rand.Seed(time.Now().UnixNano())
-	pingTime := rand.Intn(maxPingTime)
-	fmt.Println(domain, "needs", pingTime, "seconds")
-	time.Sleep(time.Duration(pingTime) * time.Second)
+
+	pingTime := rand.Intn(maxPingTimeInMilliseconds)
+	fmt.Println(domain, "needs", pingTime, "milliseconds to ping")
+
+	time.Sleep(time.Duration(pingTime) * time.Millisecond)
 
 	return pingTime
 }
