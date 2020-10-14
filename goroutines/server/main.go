@@ -48,7 +48,6 @@ func main() {
 		}(ctx, domain)
 	}
 
-	defer wg.Done()
 	select {
 	case res := <-fastest:
 		fmt.Println("Fastest domain is", res)
