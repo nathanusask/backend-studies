@@ -19,7 +19,7 @@ func main() {
 			return
 		}
 		go func() {
-			fmt.Println("A: ", counter)
+			fmt.Println("A->", counter)
 			atomic.AddInt32(&counter, 1)
 			incr <- counter
 		}()
@@ -29,7 +29,7 @@ func main() {
 			return
 		}
 		go func() {
-			fmt.Println("B->", counter)
+			fmt.Println("B: ", counter)
 			atomic.AddInt32(&counter, 1)
 			incr <- counter
 		}()
