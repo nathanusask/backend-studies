@@ -13,11 +13,7 @@ func main() {
 		incr <- counter
 	}()
 
-	for {
-		counter = <-incr
-		if counter > 20 {
-			return
-		}
+	for counter = <-incr; counter < 23; counter = <-incr {
 		go func() {
 			fmt.Println("A->", counter)
 			atomic.AddInt32(&counter, 1)
@@ -25,9 +21,6 @@ func main() {
 		}()
 
 		counter = <-incr
-		if counter > 20 {
-			return
-		}
 		go func() {
 			fmt.Println("B: ", counter)
 			atomic.AddInt32(&counter, 1)
