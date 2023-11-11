@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// worker prints numbers sequentially, but each worker prints every numWorkers-th number.
+// After numbers are printed sequentially, each worker then waits for an exit signal.
 func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-chan bool, next chan<- bool, last chan<- bool, done chan<- bool) {
 	cur := i + 1
 	for {
