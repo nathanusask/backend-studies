@@ -19,14 +19,16 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 	cur := i + 1
 	for {
 		<-r
-		if cur <= n {
-			fmt.Printf("worker %d: %d\n", i, cur)
-			if cur == n {
-				close(last)
-			}
-			cur += numWorkers
+		fmt.Printf("worker %d: %d\n", i, cur)
+		if cur == n {
+			close(last) // signal the last number is printed
 		}
+		cur += numWorkers
 		if cur > n {
+			// when the last number of the current worker is printed, the next worker will print its last number
+			// if here we instead send a signal to the next worker which is not receiving the signal
+			// the program will panic
+			// remember, sending to a channel that has no receivers will panic
 			close(w)
 			break
 		}
@@ -100,6 +102,9 @@ func printNumbersWithWorkers(n, numWorkers int) {
 // main is the entry point of the program.
 func main() {
 	printNumbersWithWorkers(40, 6)
+	fmt.Println()
 	printNumbersWithWorkers(10, 3)
+	fmt.Println()
 	printNumbersWithWorkers(9, 3)
+	fmt.Println()
 }
