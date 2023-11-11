@@ -90,6 +90,7 @@ func printNumbersWithWorkers(n, numWorkers int) {
 	}
 }
 
+// main is the entry point of the program.
 func main() {
 	printNumbersWithWorkers(40, 6)
 	printNumbersWithWorkers(10, 3)
