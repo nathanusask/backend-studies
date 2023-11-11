@@ -6,7 +6,16 @@ import (
 
 // worker prints numbers sequentially, but each worker prints every numWorkers-th number.
 // After numbers are printed sequentially, each worker then waits for an exit signal.
-func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-chan bool, next chan<- bool, last chan<- bool, done chan<- bool) {
+// i: worker id, also the starting number+1
+// numWorkers: number of workers
+// n: the last number to print
+// r: receive channel
+// w: send channel
+// exitSignal: receive channel for exit signal
+// nextExitSignal: send channel for exit signal
+// last: send channel for last number
+// done: send channel for done signal
+func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-chan bool, nextExitSignal chan<- bool, last chan<- bool, done chan<- bool) {
 	cur := i + 1
 	for {
 		<-r
@@ -26,9 +35,9 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 
 	<-exitSignal
 	if i != numWorkers-1 {
-		next <- true
+		nextExitSignal <- true
 	} else {
-		close(next)
+		close(nextExitSignal)
 	}
 	fmt.Printf("worker %d has exited\n", i)
 	done <- true
@@ -37,6 +46,8 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 // printNumbersWithWorkers prints numbers from 1 to n with numWorkers workers.
 // It prints numbers sequentially, but each worker prints every numWorkers-th number.
 // After numbers are printed sequentially, each worker then prints an exit message in sequential order.
+// n: the last number to print
+// numWorkers: number of workers
 // For example, if n = 10 and numWorkers = 3, then the output will be:
 // worker 0: 1
 // worker 1: 2
