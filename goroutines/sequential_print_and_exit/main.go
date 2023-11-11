@@ -1,5 +1,15 @@
 package main
 
+/*
+只用channel交替打印数字并有序退出。
+
+要求：
+
+1. 不能使用`WaitGroup/Mutex/`,只能使用`channel;
+2. 不能出现deadlock，程序没有运行时错误，即没有panic；
+3. 数字交替打印后，worker有序退出，不能出现数字还没打完但已经有worker退出的情况。
+*/
+
 import (
 	"fmt"
 )
