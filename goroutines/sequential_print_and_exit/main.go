@@ -63,6 +63,7 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 // worker 1 has exited
 // worker 2 has exited
 func printNumbersWithWorkers(n, numWorkers int) {
+	// init channels
 	ch, exitChan := make([]chan bool, numWorkers), make([]chan bool, numWorkers)
 	for i := 0; i < numWorkers; i++ {
 		ch[i] = make(chan bool)
@@ -70,21 +71,27 @@ func printNumbersWithWorkers(n, numWorkers int) {
 	}
 	done := make(chan bool, numWorkers)
 	last := make(chan bool)
+
+	// make sure all channels are closed or ready for gc
 	defer func() {
 		ch, exitChan = nil, nil // for gc
 		close(done)
 	}()
+
+	// start workers
 	for i := 0; i < numWorkers; i++ {
 		go worker(i, numWorkers, n, ch[i], ch[(i+1)%numWorkers], exitChan[i], exitChan[(i+1)%numWorkers], last, done)
 	}
-	ch[0] <- true
-	<-last
-	exitChan[0] <- true
+	ch[0] <- true       // signal the first worker to start printing
+	<-last              // wait for the last number to be printed
+	exitChan[0] <- true // start the first worker to exit
+	// wait for all workers to exit
 	count := 0
 	for {
 		<-done
 		count++
 		if count == numWorkers {
+			// all workers have exited
 			return
 		}
 	}
