@@ -32,6 +32,23 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 	done <- true
 }
 
+// printNumbersWithWorkers prints numbers from 1 to n with numWorkers workers.
+// It prints numbers sequentially, but each worker prints every numWorkers-th number.
+// After numbers are printed sequentially, each worker then prints an exit message in sequential order.
+// For example, if n = 10 and numWorkers = 3, then the output will be:
+// worker 0: 1
+// worker 1: 2
+// worker 2: 3
+// worker 0: 4
+// worker 1: 5
+// worker 2: 6
+// worker 0: 7
+// worker 1: 8
+// worker 2: 9
+// worker 0: 10
+// worker 0 has exited
+// worker 1 has exited
+// worker 2 has exited
 func printNumbersWithWorkers(n, numWorkers int) {
 	ch, exitChan := make([]chan bool, numWorkers), make([]chan bool, numWorkers)
 	for i := 0; i < numWorkers; i++ {
