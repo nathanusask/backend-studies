@@ -37,10 +37,9 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 
 	<-exitSignal
 	// similar to the above, we need to make sure the next worker is ready to receive the exit signal
+	// otherwise, just close the channel
 	if i != numWorkers-1 {
 		nextExitSignal <- true
-	} else {
-		close(nextExitSignal)
 	}
 	fmt.Printf("worker %d has exited\n", i)
 	done <- true
@@ -66,6 +65,7 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 // worker 1 has exited
 // worker 2 has exited
 func printNumbersWithWorkers(n, numWorkers int) {
+	fmt.Println("print to number", n, "with", numWorkers, "workers")
 	// init channels
 	ch, exitChan := make([]chan bool, numWorkers), make([]chan bool, numWorkers)
 	for i := 0; i < numWorkers; i++ {
