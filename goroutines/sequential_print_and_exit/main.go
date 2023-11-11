@@ -36,6 +36,7 @@ func worker(i, numWorkers, n int, r <-chan bool, w chan<- bool, exitSignal <-cha
 	}
 
 	<-exitSignal
+	// similar to the above, we need to make sure the next worker is ready to receive the exit signal
 	if i != numWorkers-1 {
 		nextExitSignal <- true
 	} else {
